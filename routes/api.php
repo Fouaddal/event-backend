@@ -77,7 +77,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Services
     Route::get('/services', [ServiceController::class, 'index']);
-    Route::post('/services', [ServiceController::class, 'store']);
+   // Route::post('/services', [ServiceController::class, 'store']);
+// routes/api.php
+Route::middleware('auth:sanctum')->post('/services', [ServiceController::class, 'store']);
 
     // Invitations
     Route::post('/invitations', [InvitationController::class, 'store']);
