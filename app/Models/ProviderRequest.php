@@ -5,11 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class ProviderRequest extends  Authenticatable
+class ProviderRequest extends Model
 {
-    use HasApiTokens, HasFactory;
+     use HasApiTokens, HasFactory;
 
     protected $fillable = [
         'name',
@@ -18,12 +17,28 @@ class ProviderRequest extends  Authenticatable
         'provider_type',
         'otp',
         'email_verified_at',
-        'status', // 'pending', 'approved', 'rejected'
-        'otp_verified'
+        'status',
+        'otp_verified',
+        'services',
+        'specializations' // Added for event types
     ];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
         'otp_verified' => 'boolean',
+        'services' => 'array',
+        'specializations' => 'array' // For storing event types
+    ];
+    
+    // Event types constants
+    public const EVENT_TYPES = [
+        'creative_cultural',
+        'social_celebrations',
+        'music_performance',
+        'wellness_lifestyle',
+        'entertainment_fun',
+        'media_content',
+        'educational_academic',
+        'training_development'
     ];
 }
