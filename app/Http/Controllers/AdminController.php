@@ -8,17 +8,30 @@ use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
-    public function dashboard()
+   public function dashboard()
 {
-    $requests = ProviderRequest::where('status', 'pending')->get();
+    $requests = ProviderRequest::where('status', 'pending')
+                               ->where('provider_type', 'individual')
+                               ->get();
+
     return view('admin.dashboard', compact('requests'));
 }
+
 
 
     public function listProviderRequests()
 {
     $requests = ProviderRequest::where('status', 'pending')->get();
     return view('admin.provider-requests', compact('requests'));
+}
+
+public function listCompanies()
+{
+    $requests = ProviderRequest::where('status', 'pending')
+                                ->where('provider_type', 'company')
+                                ->get();
+
+    return view('admin.companies', compact('requests'));
 }
 
 
@@ -35,7 +48,8 @@ public function approveProviderRequest($id)
         'password'       => $request->password, // Ensure this is already hashed
         'type'           => 'provider',
         'provider_type'  => $request->provider_type,
-        'is_approved' => true
+        'is_approved' => true,
+        'services' =>$request->services
        
     ]);
 
