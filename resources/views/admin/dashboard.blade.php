@@ -37,6 +37,9 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 {{ __('messages.type') }}
                             </th>
+                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                         {{ __('messages.services') }}
+                           </th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 {{ __('messages.actions') }}
                             </th>
@@ -52,6 +55,17 @@
                                         {{ ucfirst($request->provider_type) }}
                                     </span>
                                 </td>
+                                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                @php
+    $services = is_string($request->services) ? json_decode($request->services, true) : $request->services;
+@endphp
+
+@if(is_array($services))
+    {{ implode(', ', $services) }}
+@else
+    {{ $request->services }}
+@endif
+            </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
                                     <div class="flex justify-end space-x-2">
                                         <form action="{{ route('admin.approve', $request->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to approve this request?');">
