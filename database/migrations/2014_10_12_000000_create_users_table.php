@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->boolean('is_approved')->default(false);
             $table->rememberToken();
             $table->string('otp')->nullable();
+            $table->json('services')->nullable(); 
             $table->timestamps();
         });
     }
