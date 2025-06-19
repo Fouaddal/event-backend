@@ -6,6 +6,9 @@
     </h2>
 @endsection
 
+
+
+
 @section('content')
 <div class="py-12" @if(app()->getLocale() == 'ar') dir="rtl" @endif>
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -39,6 +42,9 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 {{ __('messages.type') }}
                             </th>
+                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                         {{ __('messages.services') }}
+                           </th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 {{ __('messages.actions') }}
                             </th>
@@ -54,6 +60,13 @@
                                         {{ ucfirst($request->provider_type) }}
                                     </span>
                                 </td>
+                                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                @if(is_array($request->services))
+                    {{ implode(', ', $request->services) }}
+                @else
+                    {{ $request->services }}
+                @endif
+            </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
                                     <div class="flex justify-end space-x-2">
                                         <--form action="{{ route('admin.approve', $request->id) }}" method="POST" onsubmit="return confirm('{{ __('messages.approve') }}');">
