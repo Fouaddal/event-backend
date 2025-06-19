@@ -21,6 +21,7 @@ return new class extends Migration
     $table->timestamp('email_verified_at')->nullable();
     $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
     $table->boolean('otp_verified')->default(false);
+    $table->json('services')->nullable();
     $table->timestamps();
 });
     }
