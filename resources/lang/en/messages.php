@@ -15,8 +15,7 @@ return [
     'actions' => 'Actions',
     'approve' => 'Approve',
     'reject' => 'Reject',
-    'no_service_requests' => 'No pending service requests.',
-    'no_provider_requests' => 'No pending provider requests.',
+    'no_provider_requests' => 'No providers requests.',
     'remember_me' => 'Remember me',
     'forgot_password' => 'Forgot your password?',
     'login' => 'Log in',
@@ -27,7 +26,6 @@ return [
     'confirm_approve' => 'Are you sure you want to approve this request?',
 'confirm_reject' => 'Are you sure you want to reject this request?',
  'pending_providers' => 'Pending Provider Requests',
-    'no_provider_requests' => 'No pending provider requests.',
     'name' => 'Name',
     'email' => 'Email',
     'type' => 'Provider Type',
@@ -36,4 +34,9 @@ return [
     'reject' => 'Reject',
     'confirm_approve' => 'Are you sure you want to approve this request?',
     'confirm_reject' => 'Are you sure you want to reject this request?',
+    'companies' => 'companies',
+    'pending_companies' => 'Pending Companies',
+'no_company_requests' => 'No companies requests ',
+'event_types' => 'Event Types',
+
 ];
