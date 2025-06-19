@@ -101,13 +101,78 @@ public function registerUser(Request $request)
         ]);
     }
 
-    public function registerProvider(Request $request)
+
+public function registerProvider(Request $request)
+{
+    try {
+        Log::info('Provider registration attempt', ['email' => $request->email]);
+        
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:provider_requests,email|unique:users,email',
+            'password' => 'required|confirmed|min:6',
+            'otp' => 'required|digits:6',
+            'services' => 'required|array|min:1',
+        ]);
+        
+        Log::debug('Validation passed', ['email' => $request->email]);
+
+        $cachedOtp = Cache::get('otp_' . $request->email);
+        if (!$cachedOtp || $cachedOtp != $request->otp) {
+            Log::warning('Invalid OTP attempt', [
+                'email' => $request->email,
+                'provided_otp' => $request->otp,
+                'cached_otp' => $cachedOtp
+            ]);
+            return response()->json(['message' => 'Invalid or expired OTP'], 400);
+        }
+
+        $providerRequest = ProviderRequest::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'provider_type' => 'individual',
+            'otp' => $request->otp,
+            'status' => 'pending',
+            'otp_verified' => true,
+            'email_verified_at' => now(),
+            'services' => json_encode($request->services),
+            'specializations' => null
+        ]);
+
+        Cache::forget('otp_' . $request->email);
+
+        $token = $providerRequest->createToken('auth_token')->plainTextToken;
+
+        Log::info('Provider registration successful', ['email' => $request->email]);
+
+        return response()->json([
+            'message' => 'Provider request submitted. Please wait for admin approval.',
+            'status' => 'pending',
+            'token' => $token,
+            'name' => $providerRequest->name,
+            'email' => $providerRequest->email,
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Provider registration failed', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'request' => $request->all()
+        ]);
+        return response()->json(['message' => 'Registration failed. Please try again.'], 500);
+    }
+}
+
+  public function registerCompany(Request $request)
 {
     $request->validate([
-        'name' => 'required|string|max:255',
+        'company_name' => 'required|string|max:255',
         'email' => 'required|email|unique:provider_requests,email|unique:users,email',
         'password' => 'required|confirmed|min:6',
         'otp' => 'required|digits:6',
+        'specializations' => 'required|array|min:1',
+        'specializations.*' => 'string',
     ]);
 
     $cachedOtp = Cache::get('otp_' . $request->email);
@@ -116,14 +181,16 @@ public function registerUser(Request $request)
     }
 
     $providerRequest = ProviderRequest::create([
-        'name' => $request->name,
+        'name' => $request->company_name,
         'email' => $request->email,
         'password' => Hash::make($request->password),
-        'provider_type' => 'individual', // Hardcoded
+        'provider_type' => 'company',
         'otp' => $request->otp,
         'status' => 'pending',
         'otp_verified' => true,
         'email_verified_at' => now(),
+        'specializations' => $request->specializations, // No need for json_encode if using $casts
+         'services' => null,
     ]);
 
     Cache::forget('otp_' . $request->email);
@@ -131,51 +198,15 @@ public function registerUser(Request $request)
     $token = $providerRequest->createToken('auth_token')->plainTextToken;
 
     return response()->json([
-        'message' => 'Provider request submitted. Please wait for admin approval.',
+        'message' => 'Company request submitted. Please wait for admin approval.',
         'status' => 'pending',
         'token' => $token,
         'name' => $providerRequest->name,
         'email' => $providerRequest->email,
+        'specializations' => $providerRequest->specializations,
     ]);
 }
 
-    public function registerCompany(Request $request)
-    {
-        $request->validate([
-            'company_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:provider_requests,email|unique:users,email',
-            'password' => 'required|confirmed|min:6',
-            'otp' => 'required|digits:6',
-        ]);
-
-        $cachedOtp = Cache::get('otp_' . $request->email);
-        if (!$cachedOtp || $cachedOtp != $request->otp) {
-            return response()->json(['message' => 'Invalid or expired OTP'], 400);
-        }
-
-        $providerRequest = ProviderRequest::create([
-            'name' => $request->company_name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'provider_type' => 'company',
-            'otp' => $request->otp,
-            'status' => 'pending',
-            'otp_verified' => true,
-            'email_verified_at' => now(),
-        ]);
-
-        Cache::forget('otp_' . $request->email);
-
-        $token = $providerRequest->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Company request submitted. Please wait for admin approval.',
-            'status' => 'pending',
-           'token' => $token,
-    'name' => $providerRequest->name,
-    'email' => $providerRequest->email,
-        ]);
-    }
 
 
 public function login(Request $request)
