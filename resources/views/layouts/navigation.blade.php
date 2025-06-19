@@ -16,9 +16,11 @@
                         {{ __('messages.providers') }}
                     </x-nav-link>
 
-                    <x-nav-link :href="route('admin.services.index')" :active="request()->routeIs('admin.services.*')">
-                        {{ __('messages.services') }}
-                    </x-nav-link>
+                <x-nav-link :href="route('admin.companies')" :active="request()->routeIs('admin.companies')">
+    {{ __('messages.companies') }}
+</x-nav-link>
+
+
                 </div>
             </div>
 
@@ -77,9 +79,7 @@
                 {{ __('messages.dashboard') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link :href="route('admin.services.index')" :active="request()->routeIs('admin.services.*')">
-                {{ __('messages.services') }}
-            </x-responsive-nav-link>
+        
         </div>
 
         <!-- Responsive Settings Options -->
