@@ -15,6 +15,14 @@ use App\Http\Controllers\ServiceController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+   // Route::get('/providers', [AdminController::class, 'listIndividualProviders'])->name('individualProviders');
+   Route::get('/companies', [AdminController::class, 'listCompanies'])->name('companies');
+
+});
+
+
+
 Route::get('/dashboard', [AdminController::class, 'dashboard'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
@@ -37,11 +45,11 @@ Route::get('/', function () {
 });
 
 
-Route::middleware(['auth', 'verified', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
+/*Route::middleware(['auth', 'verified', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/services', [ServiceController::class, 'unapprovedServices'])->name('services.index');
     Route::post('/services/{id}/approve', [ServiceController::class, 'approve'])->name('services.approve');
     Route::post('/services/{id}/reject', [ServiceController::class, 'reject'])->name('services.reject');
-});
+});*/
 
 
 
@@ -76,5 +84,10 @@ Route::get('/lang/{locale}', function ($locale) {
     }
     return redirect()->back();
 })->name('lang.switch');
+use App\Http\Controllers\Auth\EmailVerificationNotificationController;
+Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+    ->middleware(['auth', 'throttle:6,1'])
+    ->name('verification.send');
+
 
 require __DIR__.'/auth.php';
