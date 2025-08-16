@@ -28,7 +28,9 @@ class Kernel extends HttpKernel
         'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
         'admin' => \App\Http\Middleware\AdminOnly::class,
         'auth.pending' => \App\Http\Middleware\AuthenticatePendingProvider::class,
-
+        'approved.provider' => \App\Http\Middleware\ApprovedProvider::class,
+        'approved.individual' => \App\Http\Middleware\ApprovedIndividual::class,
+        'only.my.offers' => \App\Http\Middleware\OnlyMyOffers::class,
     ];
 
     /**
