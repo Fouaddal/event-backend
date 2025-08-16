@@ -8,6 +8,13 @@ return [
     ],
 
     'guards' => [
+    'sanctum' => [
+        'driver' => 'sanctum',
+        'provider' => 'users',
+    ],
+],
+
+    'guards' => [
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
