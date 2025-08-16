@@ -15,6 +15,24 @@ use App\Http\Controllers\ServiceController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+//Route::get('/admin/events/pending', [AdminController::class, 'pendingEvents'])->name('admin.pending-events');
+Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
+  //  Route::get('/events/pending', [AdminController::class, 'pendingEvents'])->name('events.pending');
+    Route::post('/approve-event/{id}', [AdminController::class, 'approveEventRequest'])->name('events.approve');
+    Route::post('/reject-event/{id}', [AdminController::class, 'rejectEventRequest'])->name('events.reject');
+});
+
+
+Route::middleware(['web', 'auth', 'is_admin'])->group(function () {
+    Route::get('/admin/events/pending', [AdminController::class, 'pendingEvents'])->name('admin.events.pending');
+});
+
+
+
+
+
+
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
    // Route::get('/providers', [AdminController::class, 'listIndividualProviders'])->name('individualProviders');
    Route::get('/companies', [AdminController::class, 'listCompanies'])->name('companies');
