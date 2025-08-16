@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\ProviderRequest;
 use App\Models\User;
+use App\Models\Event;
 use Illuminate\Http\Request;
-
+use App\Models\EventRequest;
 class AdminController extends Controller
 {
    public function dashboard()
@@ -49,8 +50,8 @@ public function approveProviderRequest($id)
         'type'           => 'provider',
         'provider_type'  => $request->provider_type,
         'is_approved' => true,
-        'services' =>$request->services
-       
+        'services' =>$request->services,
+        'specializations' => $request->specializations,
     ]);
 
     // Generate a token using Laravel Sanctum
@@ -101,4 +102,74 @@ public function approveProviderRequest($id)
 
         return redirect()->back()->with('success', 'Provider rejected and deleted.');
     }
+
+
+// Admin approves event request and creates actual event
+public function approveEventRequest($id)
+{
+    // Retrieve the pending event request
+    $request = EventRequest::where('id', $id)->where('status', 'pending')->firstOrFail();
+
+    // Create the event in the events table
+    $event = Event::create([
+        'user_id'       => $request->user_id,
+        'title'         => $request->title,
+        'description'   => $request->description,
+        'date_time'     => $request->date_time,
+        'location'      => $request->location,
+        'image'         => $request->image,
+        'ticket_price'  => $request->ticket_price,
+        'capacity'      => $request->capacity,
+        'category'      => $request->category,
+        'status'        => "approved"
+    ]);
+
+    // Mark the request as approved
+    $request->update(['status' => 'approved']);
+
+    // Optional: you can add a notification or log here
+
+    // Return response (HTML or JSON depending on usage)
+    return redirect()->back()->with('success', 'Event approved and published.');
+}
+
+public function rejectEventRequest($id)
+{
+    $request = EventRequest::where('id', $id)->where('status', 'pending')->firstOrFail();
+    $request->update(['status' => 'rejected']);
+
+    return redirect()->back()->with('success', 'Event request rejected.');
+}
+
+
+
+// Admin rejects event request
+
+
+
+
+    // app/Http/Controllers/AdminController.php
+public function pendingEvents()
+{
+    $events = EventRequest::where('status', 'pending')->with('company')->get();
+    return view('admin.pending-events', compact('events'));
+}
+
+public function approveEvent($id)
+{
+    $event = Event::findOrFail($id);
+    $event->status = 'approved';
+    $event->save();
+
+    return redirect()->back()->with('success', 'Event approved');
+}
+
+public function rejectEvent($id)
+{
+    $event = Event::findOrFail($id);
+    $event->status = 'rejected';
+    $event->save();
+
+    return redirect()->back()->with('success', 'Event rejected');
+}
 }
