@@ -167,7 +167,7 @@ public function registerProvider(Request $request)
   public function registerCompany(Request $request)
 {
     $request->validate([
-        'company_name' => 'required|string|max:255',
+        'name' => 'required|string|max:255',
         'email' => 'required|email|unique:provider_requests,email|unique:users,email',
         'password' => 'required|confirmed|min:6',
         'otp' => 'required|digits:6',
@@ -181,7 +181,7 @@ public function registerProvider(Request $request)
     }
 
     $providerRequest = ProviderRequest::create([
-        'name' => $request->company_name,
+        'name' => $request->name,
         'email' => $request->email,
         'password' => Hash::make($request->password),
         'provider_type' => 'company',
@@ -227,7 +227,7 @@ public function login(Request $request)
         return response()->json([
             'message' => 'Login successful',
             'token' => $token,
-            'name' => $user->name,
+            'user'=>$user,
         ]);
     }
 
