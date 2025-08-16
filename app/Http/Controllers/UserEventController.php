@@ -21,17 +21,19 @@ class UserEventController extends Controller
     /**
      * Create a new event and attach providers as pending
      */
-    public function store(Request $request)
+   public function store(Request $request)
 {
     $request->validate([
         'title' => 'required|string|max:255',
+        'description' => 'nullable|string', // 🆕 optional
         'date' => 'required|date|after_or_equal:today',
         'time' => 'required|date_format:h:i A',
         'is_public' => 'required|in:private,public',
         'type' => 'required|in:Creative & Cultural,Social Celebrations,Music & Performance,Wellness & Lifestyle,Entertainment & Fun,Media & Content,Educational & Academic,Training & Development',
         'location' => 'required|string|max:255',
         'offers' => 'sometimes|array',
-        'offers.*' => 'exists:offers,id'
+        'offers.*' => 'exists:offers,id',
+        'price' => 'required_if:is_public,public|numeric|min:0' // 🆕 only if public
     ]);
 
     $time = \Carbon\Carbon::createFromFormat('h:i A', $request->time)->format('H:i:s');
@@ -39,9 +41,11 @@ class UserEventController extends Controller
     $event = UserEvent::create([
         'user_id' => auth()->id(),
         'title' => $request->title,
+        'description' => $request->description, // 🆕
         'date' => $request->date,
         'time' => $time,
         'is_public' => $request->is_public === 'public',
+        'price' => $request->is_public === 'public' ? $request->price : null, // 🆕
         'type' => $request->type,
         'location' => $request->location,
         'invitation_code' => Str::random(10),
@@ -60,6 +64,7 @@ class UserEventController extends Controller
         'event' => $event->load('offers')
     ], 201);
 }
+
 
     /**
      * Provider responds to an event invitation (approve/reject)
