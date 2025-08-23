@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
   use Stripe\Stripe;
 use Stripe\PaymentIntent;
-
+use App\Models\EventResponse;
 class UserEventController extends Controller
 {
 
@@ -61,8 +61,9 @@ public function getUserEvents()
     /**
      * Create a new event and attach providers as pending
      */
- public function store(Request $request)
+public function store(Request $request)
 {
+    // 1️⃣ Validate the request
     $request->validate([
         'title' => 'required|string|max:255',
         'description' => 'nullable|string',
@@ -76,9 +77,10 @@ public function getUserEvents()
         'price' => 'required_if:is_public,public|numeric|min:0'
     ]);
 
+    // 2️⃣ Convert time to 24-hour format
     $time = \Carbon\Carbon::createFromFormat('h:i A', $request->time)->format('H:i:s');
 
-    // Create event with dynamic status
+    // 3️⃣ Create the event with dynamic status
     $event = UserEvent::create([
         'user_id' => auth()->id(),
         'title' => $request->title,
@@ -90,26 +92,30 @@ public function getUserEvents()
         'type' => $request->type,
         'location' => $request->location,
         'invitation_code' => Str::random(10),
-        'status' => $request->has('offers') && count($request->offers) > 0 
-                    ? 'pending' 
+        'status' => $request->has('offers') && count($request->offers) > 0
+                    ? 'pending'
                     : 'approved'
     ]);
 
-    // Attach offers if provided
+    // 4️⃣ Attach offers if provided
     if ($request->has('offers') && count($request->offers) > 0) {
         foreach ($request->offers as $offerId) {
             $event->offers()->attach($offerId, ['status' => 'pending']);
         }
     }
 
+    // 5️⃣ Build the full invitation link
+    $invitationLink = url('/invite/' . $event->invitation_code);
+
+    // 6️⃣ Return JSON response
     return response()->json([
-        'message' => $event->status === 'approved' 
-                        ? 'Event created successfully and automatically approved (no offers).' 
+        'message' => $event->status === 'approved'
+                        ? 'Event created successfully and automatically approved (no offers).'
                         : 'Event created successfully and is pending offer approvals.',
-        'event' => $event->load('offers')
+        'event' => $event->load('offers'),
+        'invitation_link' => $invitationLink
     ], 201);
 }
-
 
 
     /**
@@ -195,6 +201,56 @@ public function respondToEvent(Request $request, UserEvent $event)
     return response()->json([
         'requests' => $requests
     ]);
+}
+
+
+/*public function showByInvitationCode($code)
+{
+    $event = UserEvent::with(['offers.user']) // include offers and provider info
+        ->where('invitation_code', $code)
+        ->first();
+
+    if (!$event) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Invalid invitation code.'
+        ], 404);
+    }
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Event details fetched successfully.',
+        'event' => $event
+    ], 200);
+}*/
+public function showByInvitationCode($code)
+{
+    $event = UserEvent::with(['offers.user'])->where('invitation_code', $code)->first();
+
+    if (!$event) {
+        abort(404, 'Invalid invitation code.');
+    }
+
+    return view('events.invite', compact('event'));
+}
+
+
+public function respondToInvitation(Request $request, $code)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'response' => 'required|in:coming,not_coming'
+    ]);
+
+    $event = UserEvent::where('invitation_code', $code)->firstOrFail();
+
+    $response = EventResponse::create([
+        'user_event_id' => $event->id,
+        'name' => $request->name,
+        'response' => $request->response
+    ]);
+
+    return redirect()->back()->with('success', 'Your response has been recorded!');
 }
 
 
