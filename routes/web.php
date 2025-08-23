@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\UserEventController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -15,6 +16,9 @@ use App\Http\Controllers\ServiceController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+Route::post('/invite/{code}/respond', [UserEventController::class, 'respondToInvitation']);
+Route::get('/invite/{code}', [UserEventController::class, 'showByInvitationCode']);
 
 //Route::get('/admin/events/pending', [AdminController::class, 'pendingEvents'])->name('admin.pending-events');
 Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
