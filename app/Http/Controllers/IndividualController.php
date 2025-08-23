@@ -327,4 +327,18 @@ public function destroy(Offer $offer)
     return response()->json(['message' => 'Event deleted']);
 }
 
+
+
+public function getIndividualProviders()
+    {
+        $users = User::where('type', 'provider')
+                     ->where('provider_type', 'individual')
+                     ->get();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Individual providers fetched successfully.',
+            'data' => $users
+        ], 200);
+    }
 }
