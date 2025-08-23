@@ -10,6 +10,46 @@ use Stripe\PaymentIntent;
 
 class UserEventController extends Controller
 {
+
+    /**
+ * Delete an event created by the logged-in user
+ */
+public function destroy(UserEvent $event)
+{
+    // Ensure the logged-in user owns the event
+    if ($event->user_id !== auth()->id()) {
+        return response()->json([
+            'status' => false,
+            'message' => 'You are not authorized to delete this event.'
+        ], 403);
+    }
+
+    $event->delete();
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Event deleted successfully.'
+    ], 200);
+}
+
+
+    /**
+ * Get all events created by the logged-in user
+ */
+public function getUserEvents()
+{
+    $userId = auth()->id();
+
+    $events = UserEvent::with(['offers.user']) // only load offers + provider user
+        ->where('user_id', $userId)
+        ->get();
+
+    return response()->json([
+        'events' => $events
+    ]);
+}
+
+
     /**
      * List all events (with providers & services)
      */
@@ -21,11 +61,11 @@ class UserEventController extends Controller
     /**
      * Create a new event and attach providers as pending
      */
-   public function store(Request $request)
+ public function store(Request $request)
 {
     $request->validate([
         'title' => 'required|string|max:255',
-        'description' => 'nullable|string', // 🆕 optional
+        'description' => 'nullable|string',
         'date' => 'required|date|after_or_equal:today',
         'time' => 'required|date_format:h:i A',
         'is_public' => 'required|in:private,public',
@@ -33,37 +73,43 @@ class UserEventController extends Controller
         'location' => 'required|string|max:255',
         'offers' => 'sometimes|array',
         'offers.*' => 'exists:offers,id',
-        'price' => 'required_if:is_public,public|numeric|min:0' // 🆕 only if public
+        'price' => 'required_if:is_public,public|numeric|min:0'
     ]);
 
     $time = \Carbon\Carbon::createFromFormat('h:i A', $request->time)->format('H:i:s');
 
+    // Create event with dynamic status
     $event = UserEvent::create([
         'user_id' => auth()->id(),
         'title' => $request->title,
-        'description' => $request->description, // 🆕
+        'description' => $request->description,
         'date' => $request->date,
         'time' => $time,
         'is_public' => $request->is_public === 'public',
-        'price' => $request->is_public === 'public' ? $request->price : null, // 🆕
+        'price' => $request->is_public === 'public' ? $request->price : null,
         'type' => $request->type,
         'location' => $request->location,
         'invitation_code' => Str::random(10),
-        'status' => 'pending'
+        'status' => $request->has('offers') && count($request->offers) > 0 
+                    ? 'pending' 
+                    : 'approved'
     ]);
 
-    // Attach offers with "pending" status
-    if ($request->has('offers')) {
+    // Attach offers if provided
+    if ($request->has('offers') && count($request->offers) > 0) {
         foreach ($request->offers as $offerId) {
             $event->offers()->attach($offerId, ['status' => 'pending']);
         }
     }
 
     return response()->json([
-        'message' => 'Event created successfully and is pending offer approvals',
+        'message' => $event->status === 'approved' 
+                        ? 'Event created successfully and automatically approved (no offers).' 
+                        : 'Event created successfully and is pending offer approvals.',
         'event' => $event->load('offers')
     ], 201);
 }
+
 
 
     /**
