@@ -187,6 +187,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/events', [UserEventController::class, 'store']);
     Route::post('/events/{event}/respond', [UserEventController::class, 'respondToEvent']);
      Route::get('/provider/requests', [UserEventController::class, 'getProviderRequests']);
+     Route::get('/my-events', [UserEventController::class, 'getUserEvents']);
+
 });
 
 use App\Http\Controllers\UserPublicController;
@@ -218,4 +220,17 @@ use App\Http\Controllers\EventHistoryController;
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-events/upcoming', [EventHistoryController::class, 'myUpcomingEvents']);
     Route::get('/my-events/past', [EventHistoryController::class, 'myPastEvents']);
+});
+
+Route::get('/individual-providers', [IndividualController::class, 'getIndividualProviders']);
+
+
+Route::delete('/events/{event}', [UserEventController::class, 'destroy']);
+
+
+
+
+// Authenticated route (user must be logged in)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user/events', [UserEventController::class, 'getUserEvents']);
 });
