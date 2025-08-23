@@ -46,4 +46,9 @@ class UserEvent extends Model
         ->withTimestamps();
 }
 
+public function responses()
+{
+    return $this->hasMany(EventResponse::class, 'user_event_id');
+}
+
 }
