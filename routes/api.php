@@ -225,12 +225,13 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/individual-providers', [IndividualController::class, 'getIndividualProviders']);
 
 
-Route::delete('/events/{event}', [UserEventController::class, 'destroy']);
 
+//Route::get('/invite/{code}', [UserEventController::class, 'showByInvitationCode']);
 
 
 
 // Authenticated route (user must be logged in)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/events', [UserEventController::class, 'getUserEvents']);
+    Route::delete('/events/{event}', [UserEventController::class, 'destroy']);
 });
