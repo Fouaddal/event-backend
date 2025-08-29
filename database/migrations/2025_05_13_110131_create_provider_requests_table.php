@@ -9,22 +9,24 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
-    {
-        Schema::create('provider_requests', function (Blueprint $table) {
-    $table->id();
-    $table->string('name');
-    $table->string('email')->unique();
-    $table->string('password');
-    $table->string('provider_type');
-    $table->string('otp');
-    $table->timestamp('email_verified_at')->nullable();
-    $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
-    $table->boolean('otp_verified')->default(false);
-    $table->json('services')->nullable();
-    $table->timestamps();
-});
-    }
+   public function up()
+{
+    Schema::create('provider_requests', function (Blueprint $table) {
+        $table->id();
+        $table->string('name');
+        $table->string('email')->unique();
+        $table->string('email_confirmation')->nullable(); // Add this line
+        $table->string('password');
+        $table->string('provider_type');
+        $table->string('otp');
+        $table->timestamp('email_verified_at')->nullable();
+        $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+        $table->boolean('otp_verified')->default(false);
+        $table->json('services')->nullable();
+        $table->json('specializations')->nullable();
+        $table->timestamps();
+    });
+}
 
     /**
      * Reverse the migrations.
