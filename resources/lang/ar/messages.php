@@ -36,5 +36,6 @@ return [
     'confirm_approve' => 'هل أنت متأكد أنك تريد قبول هذا الطلب؟',
     'confirm_reject' => 'هل أنت متأكد أنك تريد رفض هذا الطلب؟',
     'no_company_requests' => 'لا توجد طلبات شركات حالياً.',
+    'email_confirmation'=>'حساب للتحقق'
 
 ];
