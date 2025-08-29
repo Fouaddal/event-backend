@@ -110,6 +110,7 @@ public function registerProvider(Request $request)
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:provider_requests,email|unique:users,email',
+            'email_confirmation' => 'required|email|different:email', // Add validation
             'password' => 'required|confirmed|min:6',
             'otp' => 'required|digits:6',
             'services' => 'required|array|min:1',
@@ -130,6 +131,7 @@ public function registerProvider(Request $request)
         $providerRequest = ProviderRequest::create([
             'name' => $request->name,
             'email' => $request->email,
+            'email_confirmation' => $request->email_confirmation, // Add this
             'password' => Hash::make($request->password),
             'provider_type' => 'individual',
             'otp' => $request->otp,
@@ -169,6 +171,7 @@ public function registerProvider(Request $request)
     $request->validate([
         'name' => 'required|string|max:255',
         'email' => 'required|email|unique:provider_requests,email|unique:users,email',
+        'email_confirmation' => 'required|email|different:email', // Add validation
         'password' => 'required|confirmed|min:6',
         'otp' => 'required|digits:6',
         'specializations' => 'required|array|min:1',
@@ -183,14 +186,15 @@ public function registerProvider(Request $request)
     $providerRequest = ProviderRequest::create([
         'name' => $request->name,
         'email' => $request->email,
+        'email_confirmation' => $request->email_confirmation, // Add this
         'password' => Hash::make($request->password),
         'provider_type' => 'company',
         'otp' => $request->otp,
         'status' => 'pending',
         'otp_verified' => true,
         'email_verified_at' => now(),
-        'specializations' => $request->specializations, // No need for json_encode if using $casts
-         'services' => null,
+        'specializations' => $request->specializations,
+        'services' => null,
     ]);
 
     Cache::forget('otp_' . $request->email);
@@ -206,7 +210,6 @@ public function registerProvider(Request $request)
         'specializations' => $providerRequest->specializations,
     ]);
 }
-
 
 
 public function login(Request $request)
