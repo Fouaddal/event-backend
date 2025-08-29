@@ -34,9 +34,10 @@ return [
     'reject' => 'Reject',
     'confirm_approve' => 'Are you sure you want to approve this request?',
     'confirm_reject' => 'Are you sure you want to reject this request?',
-    'companies' => 'companies',
+    'Companies' => 'Companies',
     'pending_companies' => 'Pending Companies',
 'no_company_requests' => 'No companies requests ',
 'event_types' => 'Event Types',
+'email_confirmation'=>'email_confirmation'
 
 ];
