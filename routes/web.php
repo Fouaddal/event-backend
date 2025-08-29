@@ -16,6 +16,29 @@ use App\Http\Controllers\UserEventController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+Route::get('/admin/dashboard/view', [AdminController::class, 'dashboard'])->name('admin.dashboard.view');
+
+// API endpoints
+
+
+Route::prefix('api/admin')->group(function() {
+    Route::get('/dashboard-stats', [AdminController::class, 'dashboardStats'])->name('api.dashboard.stats');
+    Route::get('/providers-by-type', [AdminController::class, 'providersByType'])->name('api.providers.by.type');
+    Route::get('/events-status', [AdminController::class, 'eventsStatus'])->name('api.events.status');
+    Route::get('/offers-over-time', [AdminController::class, 'offersOverTime'])->name('api.offers.over.time');
+    Route::get('/recent-activity', [AdminController::class, 'recentActivity'])->name('api.recent.activity');
+});
+
+
+
+Route::get('/api/providers-by-type', [AdminController::class, 'providersByType']);
+Route::get('/api/events-status', [AdminController::class, 'eventsStatus']);
+Route::get('/api/offers-over-tim', [AdminController::class, 'offersOverTime']);
+
+
+Route::get('/admin/dashboard/new', [AdminController::class, 'index'])->name('admin.new');
+
+
 
 Route::post('/invite/{code}/respond', [UserEventController::class, 'respondToInvitation']);
 Route::get('/invite/{code}', [UserEventController::class, 'showByInvitationCode']);
