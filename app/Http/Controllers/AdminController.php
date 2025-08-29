@@ -5,10 +5,158 @@ namespace App\Http\Controllers;
 use App\Models\ProviderRequest;
 use App\Models\User;
 use App\Models\Event;
+use App\Models\Offer;
 use Illuminate\Http\Request;
 use App\Models\EventRequest;
 class AdminController extends Controller
 {
+
+
+    public function dashboardStats()
+{
+    $totalProviders = \App\Models\User::where('provider_type', 'individual')->count();
+    $totalCompanies = \App\Models\User::where('provider_type', 'company')->count();
+    $totalUsers = \App\Models\User::count();
+    $totalEvents = \App\Models\Event::count();
+    $totalOffers = \App\Models\Offer::count();
+
+    return response()->json([
+        'totalUsers' => $totalUsers,
+        'totalProviders' => $totalProviders,
+        'totalCompanies' => $totalCompanies,
+        'totalEvents' => $totalEvents,
+        'totalOffers' => $totalOffers,
+    ]);
+}
+
+
+    // Providers by type
+    public function providersByType()
+    {
+        $data = User::select('provider_type')
+            ->where('type', 'provider')
+            ->selectRaw('count(*) as count')
+            ->groupBy('provider_type')
+            ->get();
+
+        return response()->json($data);
+    }
+
+    // Events status
+    public function eventsStatus()
+    {
+        $pending = Event::where('status', 'pending')->count();
+        $approved = Event::where('status', 'approved')->count();
+        $rejected = Event::where('status', 'rejected')->count();
+
+        return response()->json(compact('pending', 'approved', 'rejected'));
+    }
+
+    // Offers over time
+    public function offersOverTime()
+    {
+        $data = Offer::selectRaw('DATE(created_at) as date, count(*) as count')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        return response()->json($data);
+    }
+
+    // Recent activity (example)
+    public function recentActivity()
+{
+   $activities = EventRequest::latest()->take(10)->get()->map(function ($event) {
+        return [
+            'type' => 'event_created',
+            'message' => "New event created: {$event->title}",
+            'time' => $event->created_at->diffForHumans(),
+            'icon' => 'calendar-check',
+            'color' => 'purple',
+        ];
+    });
+
+    return response()->json($activities);
+}
+
+
+    // Blade view
+   ///////////////////////////////////////
+    // Providers by type (company vs individual)
+
+
+   public function index()
+{
+    // Counts
+    $totalProviders = User::where('provider_type', 'individual')->count();
+    $totalCompanies = User::where('provider_type', 'company')->count();
+    $totalUsers     = User::count();
+    $totalEvents    = Event::count();
+    $totalOffers    = Offer::count();
+
+    // Percentages
+    $providerPercentage = $totalUsers > 0 ? round(($totalProviders / $totalUsers) * 100, 1) : 0;
+    $companyPercentage  = $totalUsers > 0 ? round(($totalCompanies / $totalUsers) * 100, 1) : 0;
+
+    // Event statuses
+    $approvedEvents = Event::where('status', 'approved')->count();
+    $pendingEvents  = Event::where('status', 'pending')->count();
+    $rejectedEvents = Event::where('status', 'rejected')->count();
+
+    // Offers over time
+    $offersOverTime = Offer::selectRaw('DATE(created_at) as date, count(*) as count')
+        ->groupBy('date')
+        ->orderBy('date')
+        ->get();
+
+    // Top companies (by events)
+    $topCompanies = User::where('provider_type', 'company')
+        ->withCount('events')
+        ->orderByDesc('events_count')
+        ->take(5)
+        ->get();
+
+    // Recent activity
+    $activities = EventRequest::latest()
+        ->take(10)
+        ->get()
+        ->map(function ($event) {
+            return [
+                'type'    => 'event_created',
+                'message' => "New event created: {$event->title}",
+                'time'    => $event->created_at->diffForHumans(),
+                'icon'    => 'calendar-check',
+                'color'   => 'purple',
+            ];
+        });
+
+    // **Recent Events and Offers**
+    // Recent Events and Offers
+$events = Event::with('user')->latest()->take(10)->get();
+$offers = Offer::with('user')->latest()->take(10)->get();
+
+
+    return view('admin.new', compact(
+        'totalProviders',
+        'totalCompanies',
+        'totalUsers',
+        'totalEvents',
+        'totalOffers',
+        'providerPercentage',
+        'companyPercentage',
+        'approvedEvents',
+        'pendingEvents',
+        'rejectedEvents',
+        'offersOverTime',
+        'topCompanies',
+        'activities',
+        'events',       // Added
+        'offers'        // Added
+    ));
+}
+
+
+
    public function dashboard()
 {
     $requests = ProviderRequest::where('status', 'pending')
