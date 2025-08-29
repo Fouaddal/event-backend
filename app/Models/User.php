@@ -17,6 +17,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'name',
         'email',
+        'email_confirmation',
         'password',
         'type',
         'provider_type',
@@ -26,6 +27,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'services',
         'specializations',
         'description',
+        'usual_price',
         'profile_image'
     ];
 
