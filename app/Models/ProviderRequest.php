@@ -11,17 +11,18 @@ class ProviderRequest extends Model
      use HasApiTokens, HasFactory;
 
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'provider_type',
-        'otp',
-        'email_verified_at',
-        'status',
-        'otp_verified',
-        'services',
-        'specializations' // Added for event types
-    ];
+    'name',
+    'email',
+    'email_confirmation', // Add this
+    'password',
+    'provider_type',
+    'otp',
+    'email_verified_at',
+    'status',
+    'otp_verified',
+    'services',
+    'specializations'
+];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
